@@ -1,0 +1,9 @@
+fastapi 
+uvicorn 
+chromadb 
+openai 
+python-multipart 
+tiktoken
+python-dotenv
+sentence-transformers
+groq
