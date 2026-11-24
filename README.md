@@ -23,7 +23,7 @@ It allows users to upload transcripts, explore sentence-level evidence, and chat
 ### Backend
 - FastAPI
 - ChromaDB (Vector Database)
-- SentenceTransformers (`all-MiniLM-L6-v2`)
+- `all-MiniLM-L6-v2` embeddings via ONNX Runtime (ChromaDB's built-in embedder, no PyTorch)
 - Groq LLM (LLaMA 3.1)
 - Python
 
@@ -160,7 +160,7 @@ Every insight is traceable back to:
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
-````
+```
 
 ### Frontend
 
@@ -173,10 +173,47 @@ npm run dev
 ---
 
 ## 🔑 Environment Variables
-- Set up env key
+
+Backend (`backend/.env`):
 ```
 GROQ_API_KEY=your_key_here
+ALLOWED_ORIGINS=*          # optional: comma-separated frontend URLs allowed to call the API
 ```
+
+Frontend (`frontend/.env`, optional locally):
+```
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+---
+
+## 🌐 Deploy (free): backend on Hugging Face Spaces, frontend on Vercel
+
+Each browser gets its own private workspace (sent as an `X-Workspace` header), so visitors of the public demo never see each other's transcripts. Use a free [Groq](https://console.groq.com) key with no payment card: the worst case under heavy use is a temporary rate limit, never a bill.
+
+**1. Backend → Hugging Face Spaces**
+
+1. On huggingface.co choose **New Space**, pick the **Docker** SDK (blank template) and create it.
+2. In the Space's **Settings → Variables and secrets**, add the secret `GROQ_API_KEY`.
+3. Push the `backend/` folder to the Space:
+   ```bash
+   git remote add space https://huggingface.co/spaces/<your-username>/<space-name>
+   git subtree push --prefix backend space main
+   ```
+   When asked for a password, use a Hugging Face access token with write access.
+4. When the build finishes, the API is at `https://<your-username>-<space-name>.hf.space`.
+
+**2. Frontend → Vercel**
+
+1. Import this repo on vercel.com.
+2. Set **Root Directory** to `frontend` and **Application Preset** to **Vite**.
+3. Add the environment variable `VITE_API_URL` = your Space URL from step 1.4, then click **Deploy**.
+
+**3. Lock the backend to your site**
+
+In the Space's settings, add the variable `ALLOWED_ORIGINS` = your Vercel URL (for example `https://research-insight-copilot.vercel.app`).
+
+Visitors can click **Try with sample interviews** on the Upload page to explore the app without their own files.
 
 ---
 

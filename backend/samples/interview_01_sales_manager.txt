@@ -1,0 +1,19 @@
+Interview Date: Sample data (fictional participant)
+
+Interviewer: Can you walk me through how you submit expenses today?
+Participant: I travel for client visits about twice a month. I keep paper receipts in an envelope in my bag, and at the end of the month I sit down on a Sunday and type everything into the expense app. It usually takes me two hours.
+
+Interviewer: What is the hardest part of that?
+Participant: Honestly, losing receipts. Taxi receipts are tiny and fade quickly. Last quarter I lost three of them and just paid for those rides myself because it was not worth the argument with finance.
+
+Interviewer: Have you tried the receipt scanning feature in the mobile app?
+Participant: I tried it once. It read the amount wrong on a restaurant bill, it picked up the tip line instead of the total. After that I stopped trusting it and went back to typing things in manually.
+
+Interviewer: What happens after you submit a report?
+Participant: It goes to my manager and then to finance. I have no idea where it is in that process. Sometimes it takes three weeks to get reimbursed, and I have had to chase people on email to find out what is going on.
+
+Interviewer: If you could change one thing, what would it be?
+Participant: Let me snap a photo of the receipt the moment I get it, and have it read correctly. And show me a status tracker, like a parcel delivery, so I know whether my report is waiting on my manager or on finance.
+
+Interviewer: Anything else that frustrates you?
+Participant: The mileage claims. I have to calculate distances myself on a map and type them in. It feels like something the app should just do for me.

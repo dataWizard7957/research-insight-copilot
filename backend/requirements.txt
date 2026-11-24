@@ -1,9 +1,7 @@
-fastapi 
-uvicorn 
-chromadb 
-openai 
-python-multipart 
-tiktoken
+fastapi
+uvicorn
+chromadb
+python-multipart
 python-dotenv
-sentence-transformers
 groq
+numpy

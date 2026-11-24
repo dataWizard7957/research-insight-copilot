@@ -1,8 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 
+from deps import workspace
 from services.rag import query_rag
 from services.llm import stream_response
 
@@ -23,8 +24,8 @@ class ChatRequest(BaseModel):
 # =========================
 
 @router.post("/")
-def chat(req: ChatRequest):
-    return query_rag(req.question)
+def chat(req: ChatRequest, ws: str = Depends(workspace)):
+    return query_rag(req.question, ws)
 
 
 # =========================
@@ -32,11 +33,11 @@ def chat(req: ChatRequest):
 # =========================
 
 @router.post("/stream")
-def chat_stream(req: ChatRequest):
+def chat_stream(req: ChatRequest, ws: str = Depends(workspace)):
 
     try:
 
-        rag_result = query_rag(req.question)
+        rag_result = query_rag(req.question, ws)
 
         context = {
             "rag_result": rag_result,

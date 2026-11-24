@@ -6,9 +6,10 @@ load_dotenv()
 
 
 def get_client():
-    return Groq(
-        api_key=os.getenv("GROQ_API_KEY")
-    )
+    key = os.getenv("GROQ_API_KEY")
+    if not key:
+        raise RuntimeError("GROQ_API_KEY is not set on the server")
+    return Groq(api_key=key)
 
 
 def generate_response(prompt: str):

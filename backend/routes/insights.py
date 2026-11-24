@@ -1,5 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+
+from deps import workspace
 
 from services.rag import (
     generate_insights,
@@ -16,13 +18,13 @@ class FollowupRequest(BaseModel):
 
 
 @router.get("/")
-def insights():
-    return generate_insights()
+def insights(ws: str = Depends(workspace)):
+    return generate_insights(ws)
 
 
 @router.get("/summary")
-def research_summary():
-    return generate_research_summary()
+def research_summary(ws: str = Depends(workspace)):
+    return generate_research_summary(ws)
 
 
 @router.post("/followups")
@@ -30,5 +32,5 @@ def followups(req: FollowupRequest):
     return generate_followups(req.theme)
 
 @router.get("/report")
-def report():
-    return generate_research_report()
+def report(ws: str = Depends(workspace)):
+    return generate_research_report(ws)

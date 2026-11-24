@@ -1,12 +1,14 @@
-from fastapi import APIRouter
-from db.chroma_client import collection
+from fastapi import APIRouter, Depends
+
+from deps import workspace
+from services.rag import get_workspace
 from collections import defaultdict
 
 router = APIRouter()
 
 @router.get("/")
-def get_transcripts():
-    results = collection.get()
+def get_transcripts(ws: str = Depends(workspace)):
+    results = get_workspace(ws)
 
     docs = results.get("documents", [])
     metas = results.get("metadatas", [])

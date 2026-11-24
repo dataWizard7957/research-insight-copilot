@@ -1,3 +1,4 @@
+import { API_URL, WORKSPACE_HEADERS } from "../api/client";
 import { useState, useRef, useEffect } from "react";
 
 export default function Chat({ selectedSentence }) {
@@ -63,12 +64,13 @@ export default function Chat({ selectedSentence }) {
 
     try {
       const res = await fetch(
-        "http://127.0.0.1:8000/chat/stream",
+        `${API_URL}/chat/stream`,
         {
           method: "POST",
           headers: {
             "Content-Type":
               "application/json",
+            ...WORKSPACE_HEADERS,
           },
           body: JSON.stringify({
             question: currentQuestion,

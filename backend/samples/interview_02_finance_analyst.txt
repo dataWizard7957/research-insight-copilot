@@ -1,0 +1,22 @@
+Interview Date: Sample data (fictional participant)
+
+Interviewer: What is your role in the expense process?
+Participant: I am on the finance team, so I review and approve reports after the managers. I process roughly two hundred reports a month.
+
+Interviewer: Where does most of your time go?
+Participant: Chasing missing information. Around a third of reports come in without a receipt for at least one line, or with the wrong cost category. Then I send it back, the employee fixes it a week later, and it lands in my queue again.
+
+Interviewer: Why do you think categories are wrong so often?
+Participant: There are forty categories and half of them sound the same. Is a team lunch with a client "Client entertainment" or "Meals while travelling"? People guess. I would love the app to suggest the category based on the merchant.
+
+Interviewer: How do you handle policy checks?
+Participant: Manually. I check hotel nightly limits against a spreadsheet for each city. It is slow and I definitely miss things. Automatic policy warnings before someone submits would save me hours every week.
+
+Interviewer: What about employees complaining that reimbursement is slow?
+Participant: I hear that a lot, and it is fair. But half the delay is reports bouncing back and forth because of missing receipts. If receipts were captured properly in the first place, everything would move faster.
+
+Interviewer: How do you feel about the receipt scanning?
+Participant: When it works it is great. But I still have to double check every scanned amount because of mistakes with tips and currencies. Foreign currency receipts are especially messy, the conversion rate is often wrong.
+
+Interviewer: What would make your job easier?
+Participant: Fewer back-and-forth corrections, automatic policy checks, and a dashboard showing which reports are stuck and why.

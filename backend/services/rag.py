@@ -1,8 +1,10 @@
 import json
 import re
 
+import numpy as np
+
 from db.chroma_client import collection
-from services.embeddings import get_embedding
+from services.embeddings import get_embedding, get_embeddings
 from services.llm import generate_response
 
 
@@ -45,8 +47,10 @@ def clean_transcript(text: str) -> str:
     text = re.sub(r"Ask follow-up.*", "", text)
 
     # interview labels
+    # Interviewer questions are not evidence: drop those lines entirely
+    # (needs the original line breaks, so this runs before whitespace is collapsed).
+    text = re.sub(r"(?im)^\s*(Interviewer|Q):.*$", "", text)
     text = re.sub(r"Participant:\s*", "", text)
-    text = re.sub(r"Interviewer:\s*", "", text)
     text = re.sub(r"Interview Date:.*", "", text)
 
     # normalize whitespace
@@ -75,43 +79,49 @@ def split_sentences(text: str):
 # STORE TRANSCRIPTS
 # ==================================================
 
-def add_chunks(chunks, doc_id: str, filename: str):
+def add_chunks(chunks, doc_id: str, filename: str, ws: str = "default"):
     """
-    Store transcript sentences in ChromaDB.
+    Store transcript sentences in ChromaDB, tagged with the visitor's workspace.
+    All sentences are embedded in one batch.
     """
 
+    ids, docs, metas = [], [], []
     for chunk_id, chunk in enumerate(chunks):
+        for sentence_id, sentence in enumerate(split_sentences(chunk)):
+            ids.append(f"{ws}_{doc_id}_{chunk_id}_{sentence_id}")
+            docs.append(sentence)
+            metas.append({
+                "workspace": ws,
+                "transcript_id": doc_id,
+                "filename": filename,
+                "chunk_id": chunk_id,
+                "sentence_id": sentence_id,
+            })
 
-        sentences = split_sentences(chunk)
+    if not docs:
+        return 0
 
-        for sentence_id, sentence in enumerate(sentences):
+    collection.add(ids=ids, documents=docs, embeddings=get_embeddings(docs), metadatas=metas)
+    return len(docs)
 
-            embedding = get_embedding(sentence)
 
-            collection.add(
-                ids=[f"{doc_id}_{chunk_id}_{sentence_id}"],
-                documents=[sentence],
-                embeddings=[embedding],
-                metadatas=[{
-                    "transcript_id": doc_id,
-                    "filename": filename,  
-                    "chunk_id": chunk_id,
-                    "sentence_id": sentence_id,
-                }],
-            )
+def get_workspace(ws: str, embeddings: bool = False):
+    include = ["documents", "metadatas"] + (["embeddings"] if embeddings else [])
+    return collection.get(where={"workspace": ws}, include=include)
 
 
 # ==================================================
 # RAG CHAT
 # ==================================================
 
-def query_rag(question: str, top_k: int = 5):
+def query_rag(question: str, ws: str = "default", top_k: int = 5):
 
     query_embedding = get_embedding(question)
 
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=top_k,
+        where={"workspace": ws},
     )
 
     docs = results.get("documents", [[]])[0]
@@ -181,11 +191,13 @@ Question:
 # INSIGHTS GENERATION (FIXED EVIDENCE SYSTEM)
 # ==================================================
 
-def generate_insights():
+def generate_insights(ws: str = "default"):
 
-    results = collection.get()
-    documents = results.get("documents", [])
-    metadatas = results.get("metadatas", [])
+    results = get_workspace(ws, embeddings=True)
+    documents = results.get("documents") or []
+    metadatas = results.get("metadatas") or []
+    stored = results.get("embeddings")
+    doc_matrix = np.asarray(stored, dtype=np.float32) if documents else None
 
     if not documents:
         return {
@@ -239,21 +251,11 @@ Data:
         if not theme_name:
             continue
 
-        theme_embedding = get_embedding(theme_name)
-
-        # LOCAL semantic ranking (no DB cross-contamination issues)
-        scored = []
-
-        for doc, meta in zip(documents, metadatas):
-            doc_embedding = get_embedding(doc)
-
-            score = sum(a * b for a, b in zip(theme_embedding, doc_embedding))
-
-            scored.append((score, doc, meta))
-
-        scored.sort(reverse=True, key=lambda x: x[0])
-
-        top = scored[:3]
+        # Rank this workspace's sentences against the theme, reusing the
+        # embeddings stored at upload time.
+        theme_embedding = np.asarray(get_embedding(theme_name), dtype=np.float32)
+        scores = doc_matrix @ theme_embedding
+        top = [(float(scores[i]), documents[i], metadatas[i]) for i in np.argsort(-scores)[:3]]
 
         evidence = [
             {
@@ -309,9 +311,9 @@ Generate exactly 5 questions.
 # SUMMARY
 # ==================================================
 
-def generate_research_summary():
+def generate_research_summary(ws: str = "default"):
 
-    results = collection.get()
+    results = get_workspace(ws)
     metadatas = results.get("metadatas", [])
 
     participants = len(set(
@@ -320,7 +322,7 @@ def generate_research_summary():
         if m
     ))
 
-    insights = generate_insights()
+    insights = generate_insights(ws)
 
     return {
         "participants": participants,
@@ -338,9 +340,9 @@ def generate_research_summary():
 # FULL REPORT
 # ==================================================
 
-def generate_research_report():
+def generate_research_report(ws: str = "default"):
 
-    results = collection.get()
+    results = get_workspace(ws)
     documents = results.get("documents", [])
 
     if not documents:

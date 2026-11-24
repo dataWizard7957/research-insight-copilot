@@ -1,0 +1,22 @@
+Interview Date: Sample data (fictional participant)
+
+Interviewer: How often do you file expenses?
+Participant: Not often, maybe four times a year, mostly for conference trips and the occasional software subscription.
+
+Interviewer: What is that experience like?
+Participant: Because I do it so rarely, I forget how the app works every single time. I have to search the company wiki to remember which category a software subscription goes under.
+
+Interviewer: Tell me about the last conference trip.
+Participant: I paid for the flight, hotel, and conference ticket in three different currencies. Entering the foreign currency amounts was painful. The app asked me for an exchange rate and I had no idea which rate finance wanted me to use.
+
+Interviewer: Did the report get approved?
+Participant: It was sent back twice. Once because the hotel was above the nightly limit, which I did not know existed, and once because I picked the wrong category for the conference ticket. I only found out about the hotel limit after I had already paid.
+
+Interviewer: How did that make you feel?
+Participant: Frustrated. If the app had warned me about the limit when I was booking, or even when I was entering the expense, I would have chosen differently. Finding out weeks later is the worst time.
+
+Interviewer: Do you use the mobile app?
+Participant: No, I do everything on my laptop. But I would use the phone to photograph receipts if the scanning was reliable, especially for receipts in other languages.
+
+Interviewer: What would your ideal experience look like?
+Participant: Forward my booking confirmation emails and have the app create the expense lines automatically, with the right category and currency conversion already filled in. Then I just review and submit.
