@@ -187,22 +187,16 @@ VITE_API_URL=http://127.0.0.1:8000
 
 ---
 
-## 🌐 Deploy: full app in one Hugging Face Space (free)
+## 🌐 Deploy: full app on Render (free)
 
-The root `Dockerfile` builds the React app and serves it from the FastAPI backend, with the API under `/api`. Each browser gets its own private workspace (sent as an `X-Workspace` header), so visitors never see each other's transcripts. Use a [Groq](https://console.groq.com) key from an account with no payment card: heavy use then hits a temporary rate limit, never a bill.
+The root `Dockerfile` builds the React app and serves it from the FastAPI backend, with the API under `/api`, so the whole app is one service. Each browser gets its own private workspace (sent as an `X-Workspace` header), so visitors never see each other's transcripts.
 
-1. Log in: `hf auth login` (token with write access from https://huggingface.co/settings/tokens).
-2. Create the Space and add the key as a secret:
-   ```bash
-   hf repo create <space-name> --repo-type space --space-sdk docker
-   ```
-   Then add the secret `GROQ_API_KEY` in the Space's **Settings → Variables and secrets**.
-3. Upload the code, then the Space's own README (it holds the Space settings):
-   ```bash
-   hf upload <user>/<space-name> . . --repo-type space --exclude "**/node_modules/**" "**/dist/**" "**/chroma_db/**" "**/.env" ".git/**"
-   hf upload <user>/<space-name> space/README.md README.md --repo-type space
-   ```
-4. The app is live at `https://huggingface.co/spaces/<user>/<space-name>` once the build finishes.
+1. Get a free [Groq](https://console.groq.com) API key. Use an account with no payment card: heavy use then hits a temporary rate limit, never a bill.
+2. On [render.com](https://render.com), choose **New → Blueprint** and pick this repository. Render reads `render.yaml`.
+3. When asked, paste your `GROQ_API_KEY`, then click **Apply**.
+4. After the first build (a few minutes), the app is live at `https://research-insight-copilot.onrender.com` (or a similar address Render shows).
+
+Every push to `main` redeploys automatically. On the free plan the service sleeps after 15 minutes without visits, so the first visit afterwards takes 30–60 seconds. Uploaded data resets whenever it restarts.
 
 Run the same image locally:
 ```bash

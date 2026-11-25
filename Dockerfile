@@ -1,4 +1,4 @@
-# Full app in one Hugging Face Space: React frontend + FastAPI backend.
+# Full app in one container: React frontend + FastAPI backend (Render, or any Docker host).
 # Build:  docker build -t research-copilot .     Run: docker run -p 7860:7860 -e GROQ_API_KEY=... research-copilot
 
 # ---- 1. Build the React app ----
@@ -14,7 +14,6 @@ RUN npm run build
 # ---- 2. Backend, serving the API and the built app ----
 FROM python:3.12-slim
 
-# Spaces run containers as user 1000.
 RUN useradd -m -u 1000 user
 USER user
 ENV HOME=/home/user \
@@ -34,5 +33,6 @@ RUN python -c "from chromadb.utils.embedding_functions import DefaultEmbeddingFu
 COPY --chown=user backend/ .
 COPY --chown=user --from=web /web/dist ./static
 
+# Render (and most hosts) set $PORT; default to 7860 elsewhere.
 EXPOSE 7860
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}"]

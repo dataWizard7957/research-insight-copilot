@@ -1,0 +1,13 @@
+# Render Blueprint: one free web service running the root Dockerfile.
+# render.com -> New -> Blueprint -> pick this repo.
+services:
+  - type: web
+    name: research-insight-copilot
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false   # Render asks for the value when you create the service
