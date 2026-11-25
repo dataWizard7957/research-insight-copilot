@@ -1,9 +1,10 @@
 import logging
 import os
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from routes import upload, chat, insights, transcripts
 
@@ -21,10 +22,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(upload.router, prefix="/upload", tags=["upload"])
-app.include_router(chat.router, prefix="/chat", tags=["chat"])
-app.include_router(insights.router, prefix="/insights", tags=["insights"])
-app.include_router(transcripts.router, prefix="/transcripts", tags=["transcripts"])
+# "" locally (API at /upload, /chat, ...). The single-Space Docker image sets
+# "/api" so the API never clashes with the web app's own pages (/chat, /insights).
+API_PREFIX = os.getenv("API_PREFIX", "").rstrip("/")
+
+app.include_router(upload.router, prefix=f"{API_PREFIX}/upload", tags=["upload"])
+app.include_router(chat.router, prefix=f"{API_PREFIX}/chat", tags=["chat"])
+app.include_router(insights.router, prefix=f"{API_PREFIX}/insights", tags=["insights"])
+app.include_router(transcripts.router, prefix=f"{API_PREFIX}/transcripts", tags=["transcripts"])
 
 
 @app.exception_handler(Exception)
@@ -34,6 +39,25 @@ async def unhandled(_: Request, exc: Exception):
     return JSONResponse(status_code=502, content={"detail": f"{exc.__class__.__name__}: {str(exc)[:300]}"})
 
 
-@app.get("/")
-def root():
+@app.get(f"{API_PREFIX}/health")
+def health():
     return {"message": "Research Insight Copilot API running"}
+
+
+# Optionally serve the built React app from the same server (single-Space deploy).
+STATIC_DIR = Path(os.getenv("STATIC_DIR", "")) if os.getenv("STATIC_DIR") else None
+
+if STATIC_DIR and (STATIC_DIR / "index.html").is_file():
+    STATIC_ROOT = STATIC_DIR.resolve()
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def web_app(path: str):
+        file = (STATIC_ROOT / path).resolve()
+        if path and file.is_file() and STATIC_ROOT in file.parents:
+            return FileResponse(file)
+        # Client-side routes (/chat, /insights, ...) all load the app shell.
+        return FileResponse(STATIC_ROOT / "index.html")
+else:
+    @app.get("/")
+    def root():
+        return {"message": "Research Insight Copilot API running"}

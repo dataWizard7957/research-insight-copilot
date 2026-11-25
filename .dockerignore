@@ -1,0 +1,8 @@
+.git
+**/node_modules
+**/dist
+**/chroma_db
+**/.env
+**/venv
+**/.venv
+**/__pycache__

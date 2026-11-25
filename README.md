@@ -187,31 +187,28 @@ VITE_API_URL=http://127.0.0.1:8000
 
 ---
 
-## 🌐 Deploy (free): backend on Hugging Face Spaces, frontend on Vercel
+## 🌐 Deploy: full app in one Hugging Face Space (free)
 
-Each browser gets its own private workspace (sent as an `X-Workspace` header), so visitors of the public demo never see each other's transcripts. Use a free [Groq](https://console.groq.com) key with no payment card: the worst case under heavy use is a temporary rate limit, never a bill.
+The root `Dockerfile` builds the React app and serves it from the FastAPI backend, with the API under `/api`. Each browser gets its own private workspace (sent as an `X-Workspace` header), so visitors never see each other's transcripts. Use a [Groq](https://console.groq.com) key from an account with no payment card: heavy use then hits a temporary rate limit, never a bill.
 
-**1. Backend → Hugging Face Spaces**
-
-1. On huggingface.co choose **New Space**, pick the **Docker** SDK (blank template) and create it.
-2. In the Space's **Settings → Variables and secrets**, add the secret `GROQ_API_KEY`.
-3. Push the `backend/` folder to the Space:
+1. Log in: `hf auth login` (token with write access from https://huggingface.co/settings/tokens).
+2. Create the Space and add the key as a secret:
    ```bash
-   git remote add space https://huggingface.co/spaces/<your-username>/<space-name>
-   git subtree push --prefix backend space main
+   hf repo create <space-name> --repo-type space --space-sdk docker
    ```
-   When asked for a password, use a Hugging Face access token with write access.
-4. When the build finishes, the API is at `https://<your-username>-<space-name>.hf.space`.
+   Then add the secret `GROQ_API_KEY` in the Space's **Settings → Variables and secrets**.
+3. Upload the code, then the Space's own README (it holds the Space settings):
+   ```bash
+   hf upload <user>/<space-name> . . --repo-type space --exclude "**/node_modules/**" "**/dist/**" "**/chroma_db/**" "**/.env" ".git/**"
+   hf upload <user>/<space-name> space/README.md README.md --repo-type space
+   ```
+4. The app is live at `https://huggingface.co/spaces/<user>/<space-name>` once the build finishes.
 
-**2. Frontend → Vercel**
-
-1. Import this repo on vercel.com.
-2. Set **Root Directory** to `frontend` and **Application Preset** to **Vite**.
-3. Add the environment variable `VITE_API_URL` = your Space URL from step 1.4, then click **Deploy**.
-
-**3. Lock the backend to your site**
-
-In the Space's settings, add the variable `ALLOWED_ORIGINS` = your Vercel URL (for example `https://research-insight-copilot.vercel.app`).
+Run the same image locally:
+```bash
+docker build -t research-copilot .
+docker run -p 7860:7860 -e GROQ_API_KEY=your_key research-copilot    # http://localhost:7860
+```
 
 Visitors can click **Try with sample interviews** on the Upload page to explore the app without their own files.
 
