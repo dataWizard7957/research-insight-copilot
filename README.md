@@ -80,3 +80,7 @@ Use a Groq account without a payment card for public demos: heavy traffic then h
 - Theme clustering across larger transcript collections
 - Report export (PDF, Notion)
 - Persistent storage and team workspaces
+
+## Live demo
+
+[research-insight-copilot.onrender.com](https://research-insight-copilot.onrender.com). Hosted on Render's free plan, so the first visit may take up to a minute while the service wakes up. Click **Try with sample interviews** on the Upload page to explore without your own files.
